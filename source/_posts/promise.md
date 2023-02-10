@@ -159,7 +159,7 @@ class _Promise {
 }
 ```
 
-可以看到异步成功的执行了
+执行一下，我们可以看到异步成功的执行了
 
 ![img](/assets/promise/3.png)
 
