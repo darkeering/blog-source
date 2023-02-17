@@ -1,76 +1,139 @@
-const PENDING = "pending";
-const FULFILLED = "fulfilled";
-const REJECTED = "rejected";
-
 class _Promise {
   constructor(executor) {
-    this.status = PENDING;
-    this.value = undefined;
-    this.reason = undefined;
-    this.resolveCbs = [];
-    this.rejectCbs = [];
+    this.status = "pending"; // 状态
+    this.value = undefined; // resolve的值
+    this.reason = undefined; // reject的值
+    this.onResolveCbs = []; // onResolve 回调
+    this.onRejectCbs = []; // onReject 回调
     let resolve = (value) => {
-      if (this.status === PENDING) {
-        this.status = FULFILLED;
+      // 状态改变之后不可逆
+      if (this.status === "pending") {
         this.value = value;
-        this.resolveCbs.forEach((cb) => cb());
+        this.status = "resolved";
+        this.onResolveCbs.forEach((cb) => cb());
       }
     };
     let reject = (reason) => {
-      if (this.status === PENDING) {
-        this.status = REJECTED;
+      // 状态改变之后不可逆
+      if (this.status === "pending") {
         this.reason = reason;
-        this.rejectCbs.forEach((cb) => cb());
+        this.status = "rejected";
+        this.onRejectCbs.forEach((cb) => cb());
       }
     };
     executor(resolve, reject);
   }
 
+  resolvePromise(x, resolve, reject) {
+    const xType = typeof x;
+    if (xType !== "object" && xType !== "function") {
+      resolve(x);
+      return;
+    }
+    const then = x.then;
+
+    if (typeof then === "function") {
+      then.call(
+        x,
+        (data) => {
+          this.resolvePromise(data, resolve, reject);
+        },
+        (reason) => {
+          reject(reason);
+        }
+      );
+    } else {
+      resolve(x);
+    }
+  }
+
   then(onResolve, onReject) {
-    const newPromise = new _Promise((resolve, reject) => {
-      if (this.status === FULFILLED) {
-        const x = onResolve(this.value);
-        resolve(x);
+    if (typeof onResolve !== "function") onResolve = (v) => v;
+    if (typeof onReject !== "function")
+      onReject = (r) => {
+        throw r;
+      };
+    let x;
+    const newpromise = new _Promise((resolve, reject) => {
+      if (this.status === "resolved") {
+        setTimeout(() => {
+          x = onResolve(this.value);
+          this.resolvePromise(x, resolve, reject);
+        });
       }
-      if (this.status === REJECTED) {
-        const x = onReject(this.reason);
-        reject(x);
+      if (this.status === "rejected") {
+        setTimeout(() => {
+          x = onReject(this.reason);
+          this.resolvePromise(x, resolve, reject);
+        });
       }
 
-      if (this.status === PENDING) {
-        this.resolveCbs.push(() => {
-          const x = onResolve(this.value);
-          resolve(x);
+      if (this.status === "pending") {
+        this.onResolveCbs.push(() => {
+          setTimeout(() => {
+            x = onResolve(this.value);
+            this.resolvePromise(x, resolve, reject);
+          });
         });
-        this.rejectCbs.push(() => {
-          const x = onReject(this.value);
-          reject(x);
+        this.onRejectCbs.push(() => {
+          setTimeout(() => {
+            x = onReject(this.reason);
+            this.resolvePromise(x, resolve, reject);
+          });
         });
       }
     });
 
-    return newPromise;
+    return newpromise;
+  }
+
+  static all(promises) {
+    return new _Promise((resolve, reject) => {
+      let count = 0;
+      let arr = [];
+      promises.forEach((promise, index) => {
+        promise.then(
+          (res) => {
+            count++;
+            arr[index] = res;
+            if (count >= promises.length) resolve(arr);
+          },
+          (err) => {
+            reject(err);
+          }
+        );
+      });
+    });
   }
 }
 
-const p1 = new Promise((resolve, reject) => {
-  console.log("create promise");
-  resolve("p1 resolve");
-})
+// _Promise
+//   .resolve(
+//     new _Promise((resolve) => {
+//       resolve("11");
+//     })
+//   )
+//   .then((res) => {
+//     console.log(res);
+//   });
+
+_Promise
+  .all([
+    new _Promise((resolve, reject) => {
+      resolve(1);
+    }),
+    new _Promise((resolve, reject) => {
+      reject(2);
+    }),
+    new _Promise((resolve, reject) => {
+      resolve(3);
+    }),
+  ])
   .then(
-    (data) => {
-      console.log(data);
-      return "1 resolve";
+    (res) => {
+      console.log(res);
     },
     (err) => {
-      console.log(err);
-    }
-  )
-  .then(
-    (data) => {
-      console.log(data);
-    },
-    (err) => {
-      console.log(err);
+      console.log("reject", err);
     }
   );

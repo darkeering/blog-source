@@ -207,7 +207,7 @@ then(onResolve, onReject) {
     }
     if (this.status === "rejected") {
       x = onReject(this.reason);
-      reject(x);
+      resolve(x);
     }
 
     if (this.status === "pending") {
@@ -217,7 +217,7 @@ then(onResolve, onReject) {
       });
       this.onRejectCbs.push(() => {
         x = onReject(this.reason);
-        reject(x);
+        resolve(x);
       });
     }
   });
@@ -250,7 +250,7 @@ then(onResolve, onReject) {
       if (this.status === "rejected") {
         setTimeout(() => {
           x = onReject(this.reason);
-          reject(x);
+          resolve(x);
         });
       }
 
@@ -264,7 +264,7 @@ then(onResolve, onReject) {
         this.onRejectCbs.push(() => {
           setTimeout(() => {
             x = onReject(this.reason);
-            reject(x);
+            resolve(x);
           });
         });
       }
@@ -291,7 +291,7 @@ then(onResolve, onReject) {
     if (this.status === "rejected") {
       setTimeout(() => {
         x = onReject(this.reason);
-        reject(x);
+        resolve(x);
       });
     }
 
@@ -305,7 +305,7 @@ then(onResolve, onReject) {
       this.onRejectCbs.push(() => {
         setTimeout(() => {
           x = onReject(this.reason);
-          reject(x);
+          resolve(x);
         });
       });
     }
@@ -319,3 +319,106 @@ then(onResolve, onReject) {
 ![img](/assets/promise/8.png)
 
 至此，我们就大致实现了一个建议的 Promise，之后的就是处理一些特殊情况、实现一些 promise 的 api 和进行公共方法的封装
+
+### \_Promise 4.0
+
+then 函数的返回值有这几类
+
+1. 如果不是对象也不是函数，那就直接 resolve
+2. 如果是一个对象或者一个函数，但是不含有 then 函数，说明不是 promise 对象，直接 resolve
+3. 如果是一个对象或者一个函数，但是含有 then 函数，说明是一个 promise 对象，需要实现这个 promise 然后 then 的返回值来
+
+所以我们需要封装一个 resolvePromise 函数
+
+```typescript
+resolvePromise(x, resolve, reject) {
+  resolve(x)
+}
+
+then(onResolve, onReject) {
+  if (typeof onResolve !== "function") onResolve = (v) => v;
+  if (typeof onReject !== "function") onReject = (v) => v;
+  let x;
+  const newpromise = new _Promise((resolve, reject) => {
+    if (this.status === "resolved") {
+      setTimeout(() => {
+        x = onResolve(this.value);
+        this.resolvePromise(x, resolve, reject);
+      });
+    }
+    if (this.status === "rejected") {
+      setTimeout(() => {
+        x = onReject(this.reason);
+        this.resolvePromise(x, resolve, reject);
+      });
+    }
+
+    if (this.status === "pending") {
+      this.onResolveCbs.push(() => {
+        setTimeout(() => {
+          x = onResolve(this.value);
+          this.resolvePromise(x, resolve, reject);
+        });
+      });
+      this.onRejectCbs.push(() => {
+        setTimeout(() => {
+          x = onReject(this.reason);
+          this.resolvePromise(x, resolve, reject);
+        });
+      });
+    }
+  });
+
+  return newpromise;
+}
+```
+
+resolvePromise 函数需要满足之前说的三个条件
+
+```typescript
+  resolvePromise(x, resolve, reject) {
+    const xType = typeof x;
+    if (xType !== "object" && xType !== "function") {
+      resolve(x);
+      return;
+    }
+    const then = x.then;
+
+    if (typeof then === "function") {
+      then.call(
+        x,
+        (data) => {
+          this.resolvePromise(data, resolve, reject);
+        },
+        (reason) => {
+          reject(reason);
+        }
+      );
+    } else {
+      resolve(x);
+    }
+  }
+```
+
+最后添加一个 promise.all 方法
+
+```typescript
+  static all(promises) {
+    return new _Promise((resolve, reject) => {
+      let count = 0;
+      let arr = [];
+      promises.forEach((promise, index) => {
+        promise.then(
+          (res) => {
+            count++;
+            arr[index] = res;
+            if (count >= promises.length) resolve(arr);
+          },
+          (err) => {
+            reject(err);
+          }
+        );
+      });
+    });
+  }
+```
