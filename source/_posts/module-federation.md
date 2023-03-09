@@ -163,7 +163,7 @@ tags:
     },
     {
       path: "mfe2",
-      loadChildren: () => import("mfe2/Module").then((m) => m.CommmentsModule),
+      loadChildren: () => import("mfe2/Module").then((m) => m.CommentsModule),
     },
   ]);
   ```
@@ -221,10 +221,10 @@ tags:
     this.sharedLibService.setCount(this.count + 1)
   }
 
-  // mfe2 => map.component.html
+  // mfe2 => text.component.html
   <p>text works! name = {{name}}; count = {{count}}</p>
 
-  // mfe2 => map.component.ts
+  // mfe2 => text.component.ts
   name = ''
   count = 0
   constructor(
@@ -237,7 +237,7 @@ tags:
   }
   ```
 
-  现在启动项目，点击 add 按钮，指挥更改 main 中的 count 值
+  现在启动项目，点击 add 按钮，只会更改 main 中的 count 值
 
 - 最后一步，在两个项目的 webpack.config.js 中更改 shared
 
