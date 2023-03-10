@@ -1,7 +1,7 @@
 ---
 title: angular 利用 module federation 实现微前端，并实现通信(3)
 date: 2023-03-10 00:15:00
-tags: ['微前端', 'module federation', 'angular']
+tags: ["微前端", "module federation", "angular"]
 ---
 
 书接上文，我们已经实现了，项目间通信，拦截器，接下来我们要解决的问题是：1. 样式问题 2. 路由问题
@@ -111,3 +111,9 @@ RouterModule.forRoot([
 但是，这个还是有 bug 的，在当你一个 a 项目切换到另一个 b 项目的时候，通过浏览器的后退按钮是不好用的，因为，判断的当前的路由是 b 项目的，所以还是会走路由守卫
 
 另一个就是，当你从一个项目切换到另一个项目的时候，最好还是走项目间的通信，把相关信息传递给 shell 项目，通过 shell 项目进行路由切换
+
+## Demo 仓库
+
+主项目和 npm 库：https://github.com/darkeering/module-federation-darui
+
+子项目：https://github.com/darkeering/module-federation-out-darui
