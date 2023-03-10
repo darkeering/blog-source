@@ -1,7 +1,7 @@
 ---
 title: vscode的终端设置成gitbash
 date: 2023-02-09 22:44:30
-tags:
+tags: ['vscode']
 ---
 
 1. 打开 vscode 设置

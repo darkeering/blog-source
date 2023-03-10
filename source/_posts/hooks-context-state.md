@@ -1,7 +1,7 @@
 ---
 title: react 简化版类似angular service的状态管理
 date: 2023-02-06 12:59:48
-tags: [状态管理, react, 自定义]
+tags: ['状态管理', 'react']
 ---
 
 ## 原理

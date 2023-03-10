@@ -1,7 +1,7 @@
 ---
 title: angular 利用 module federation 实现微前端，并实现通信
 date: 2023-02-17 13:48:25
-tags:
+tags: ['微前端', 'module federation', 'angular']
 ---
 
 ## 创建项目，并实现模块共享

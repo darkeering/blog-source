@@ -1,7 +1,7 @@
 ---
 title: 微前端 qiankun angular子应用
 date: 2023-02-05 19:07:16
-tags: [微前端, angular]
+tags: ['微前端', "qiankun", 'angular']
 ---
 
 # 生成项目

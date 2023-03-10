@@ -1,7 +1,7 @@
 ---
 title: angular 利用 module federation 实现微前端，并实现通信(3)
 date: 2023-03-10 00:15:00
-tags:
+tags: ['微前端', 'module federation', 'angular']
 ---
 
 书接上文，我们已经实现了，项目间通信，拦截器，接下来我们要解决的问题是：1. 样式问题 2. 路由问题

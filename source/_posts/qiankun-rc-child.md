@@ -1,7 +1,7 @@
 ---
 title: 微前端 qiankun react子应用
 date: 2023-02-05 19:06:12
-tags: [微前端, react]
+tags: ['微前端', 'qiankun','react']
 ---
 
 # 生成项目

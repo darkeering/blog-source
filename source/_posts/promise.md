@@ -1,7 +1,7 @@
 ---
 title: 手写简易promise
 date: 2023-02-07 16:00:00
-tags:
+tags: ['js', 'promise']
 ---
 
 ## Promise 的能力
